@@ -10935,35 +10935,80 @@ function parseUnifiedInvoice(arg1, arg2, carriersRegistry) {
     });
   </script>
 <script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a4242e1b9ff0af8f',t:'MTc5MDYxMzUyMw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a42520848db0f258',t:'MTc5MDYyMzQ1Mg=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a42c0ac46f56f1d6',t:'MTc5MDY5NTk2Mg=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a47d94812f522df6',t:'MTc5MTU1MDk1MA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script> <script>
-  // Função para carregar as faturas do arquivo JSON
+  <script>
+  // CONFIGURAÇÃO DO SEU GITHUB - COLOQUE SEU TOKEN AQUI:
+  const GITHUB_TOKEN = "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";
+  const GITHUB_USER = "logistica2026";
+  const GITHUB_REPO = "painel-faturas";
+  const GITHUB_FILE = "faturas.json";
+
+  // Função para carregar as faturas da nuvem ao abrir o site
   async function carregarFaturasDoArquivo() {
     try {
-      const resposta = await fetch('faturas.json');
-      const dados = await resposta.json();
-      console.log("Dados lidos do faturas.json com sucesso:", dados);
-      
-      // Aqui o código do seu painel vai ler as faturas que estão guardadas no GitHub
-      if (dados && dados.length > 0) {
-        // Guarda os dados na memória do navegador para o seu painel usar
-        localStorage.setItem('faturas', JSON.stringify(dados));
+      const resposta = await fetch(`https://github.com{GITHUB_USER}/${GITHUB_REPO}/contents/${GITHUB_FILE}`, {
+        headers: { "Authorization": `token ${GITHUB_TOKEN}` }
+      });
+      if (resposta.ok) {
+        const dadosJson = await resposta.json();
+        // Decodifica o arquivo vindo do GitHub
+        const textoFaturas = decodeURIComponent(escape(atob(dadosJson.content)));
+        const dados = JSON.parse(textoFaturas);
         
-        // Avisa o seu painel para redesenhar a tabela com os dados atualizados
-        if (typeof renderFaturasTable === 'function') {
-          renderFaturasTable();
-        }
-        if (typeof updateKPIs === 'function') {
-          updateKPIs();
+        if (dados && dados.length > 0) {
+          localStorage.setItem('faturas', JSON.stringify(dados));
+          // Atualiza o visual do seu painel se as funções existirem
+          if (typeof renderFaturasTable === 'function') renderFaturasTable();
+          if (typeof updateKPIs === 'function') updateKPIs();
         }
       }
     } catch (erro) {
-      console.error("Erro ao carregar o arquivo faturas.json:", erro);
+      console.error("Erro ao carregar faturas:", erro);
     }
   }
 
-  // Executa a leitura assim que a página terminar de carregar tudo
-  window.addEventListener('DOMContentLoaded', () => {
-    carregarFaturasDoArquivo();
-  });
+  // Função para salvar as faturas diretamente na nuvem do GitHub ao cadastrar
+  async function salvarFaturasNoGitHub(novasFaturas) {
+    const url = `https://github.com{GITHUB_USER}/${GITHUB_REPO}/contents/${GITHUB_FILE}`;
+    try {
+      const resGet = await fetch(url, {
+        headers: { "Authorization": `token ${GITHUB_TOKEN}` }
+      });
+      let sha = "";
+      if (resGet.ok) {
+        const dataGet = await resGet.json();
+        sha = dataGet.sha;
+      }
+      const conteudoBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(novasFaturas, null, 2))));
+      
+      await fetch(url, {
+        method: "PUT",
+        headers: {
+          "Authorization": `token ${GITHUB_TOKEN}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          message: "Atualizando faturas via Painel Controle",
+          content: conteudoBase64,
+          sha: sha
+        })
+      });
+    } catch (erro) {
+      console.error("Erro ao salvar no GitHub:", erro);
+    }
+  }
+
+  // Monitora o painel: quando ele salvar localmente, envia para o GitHub junto
+  const originalSetItem = localStorage.setItem;
+  localStorage.setItem = function(key, value) {
+    if (key === 'faturas') {
+      salvarFaturasNoGitHub(JSON.parse(value));
+    }
+    originalSetItem.apply(this, arguments);
+  };
+
+  // Carrega os dados assim que abrir a página
+  window.addEventListener('DOMContentLoaded', carregarFaturasDoArquivo);
 </script>
+
  </body>
 </html>
